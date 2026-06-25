@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury's quests</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: 'Georgia', serif;
+    }
+    .screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .text {
+      color: #fff;
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      font-weight: 300;
+      z-index: 2;
+      text-shadow: 0 0 30px rgba(255,255,255,0.1);
+    }
+    .crack {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .crack svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="text">Loading...</div>
+    <div class="crack">
+      <svg viewBox="0 0 400 800" preserveAspectRatio="none">
+        <path d="M50,100 L80,180 L60,250 L120,320 L90,400 L150,480 L110,550 L170,650 L140,720" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+        <path d="M300,80 L260,150 L310,230 L270,300 L320,380 L280,460 L340,540 L290,620 L350,700 L310,760" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
+        <path d="M150,50 L180,120 L140,200 L200,280 L160,350 L220,430 L170,510 L230,590 L180,670 L240,750" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" fill="none"/>
+        <path d="M80,400 L130,420 L100,470 L160,490 L120,540 L180,560 L140,610 L200,630" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>
+        <path d="M320,350 L280,380 L330,410 L290,450 L340,480 L300,520 L350,550 L310,590 L360,620" stroke="rgba(255,255,255,0.2)" stroke-width="1" fill="none"/>
+        <path d="M0,300 L40,330 L10,380 L60,410 L20,460 L70,490 L30,540 L80,570" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>
+        <path d="M400,200 L360,240 L390,280 L350,320 L380,360 L340,400 L370,440 L330,480" stroke="rgba(255,255,255,0.15)" stroke-width="1" fill="none"/>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
