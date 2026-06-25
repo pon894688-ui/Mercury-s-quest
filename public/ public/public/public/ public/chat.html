@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury's quests</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <span id="chatNick"></span>
+      <button onclick="logout()">Выйти</button>
+    </div>
+    <div id="groupsList"></div>
+    <div id="messagesArea"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Напиши...">
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+  </div>
+  <script>
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) window.location.href = '/';
+    document.getElementById('chatNick').textContent = currentUser.nickname;
+    loadGroups();
+  </script>
+  <script src="/script.js"></script>
+</body>
+</html>
