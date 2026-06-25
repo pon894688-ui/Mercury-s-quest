@@ -1,0 +1,144 @@
+import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
+import { DB } from "https://deno.land/x/sqlite/mod.ts";
+
+const app = new Application();
+const router = new Router();
+const db = new DB("database.db");
+
+// Создаём таблицы
+db.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE,
+    password TEXT,
+    nickname TEXT,
+    avatar TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    creator_id INTEGER,
+    wallpaper TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS group_members (
+    group_id INTEGER,
+    user_id INTEGER,
+    can_write INTEGER DEFAULT 1,
+    can_send_photos INTEGER DEFAULT 1,
+    role TEXT DEFAULT 'member'
+  )
+`);
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER,
+    user_id INTEGER,
+    text TEXT,
+    photo TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Регистрация
+router.post("/register", async (ctx) => {
+  const body = await ctx.request.body().value;
+  const { email, password, nickname } = body;
+
+  try {
+    db.query("INSERT INTO users (email, password, nickname) VALUES (?, ?, ?)", [
+      email,
+      password,
+      nickname,
+    ]);
+    ctx.response.body = { success: true };
+  } catch {
+    ctx.response.body = { success: false, error: "Почта уже используется" };
+  }
+});
+
+// Вход
+router.post("/login", async (ctx) => {
+  const body = await ctx.request.body().value;
+  const { email, password } = body;
+
+  const user = db.query("SELECT * FROM users WHERE email = ? AND password = ?", [
+    email,
+    password,
+  ]);
+
+  if (user.length === 0) {
+    ctx.response.body = { success: false, error: "Неверная почта или пароль" };
+    return;
+  }
+
+  ctx.response.body = { success: true, user: user[0] };
+});
+
+// Получить группы пользователя
+router.get("/groups/:userId", (ctx) => {
+  const userId = ctx.params.userId;
+  const groups = db.query(`
+    SELECT g.* FROM groups g
+    JOIN group_members gm ON g.id = gm.group_id
+    WHERE gm.user_id = ?
+  `, [userId]);
+
+  ctx.response.body = groups;
+});
+
+// Получить сообщения группы
+router.get("/messages/:groupId", (ctx) => {
+  const groupId = ctx.params.groupId;
+  const messages = db.query(`
+    SELECT m.*, u.nickname, u.avatar 
+    FROM messages m
+    JOIN users u ON m.user_id = u.id
+    WHERE m.group_id = ?
+    ORDER BY m.timestamp ASC
+  `, [groupId]);
+
+  ctx.response.body = messages;
+});
+
+// Создать группу
+router.post("/create-group", async (ctx) => {
+  const body = await ctx.request.body().value;
+  const { name, creator_id } = body;
+
+  db.query("INSERT INTO groups (name, creator_id) VALUES (?, ?)", [
+    name,
+    creator_id,
+  ]);
+
+  const groupId = db.lastInsertRowId;
+  db.query("INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, ?)", [
+    groupId,
+    creator_id,
+    "admin",
+  ]);
+
+  ctx.response.body = { success: true, groupId };
+});
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+// Статические файлы
+app.use(async (ctx) => {
+  await send(ctx, ctx.request.url.pathname, {
+    root: `${Deno.cwd()}/public`,
+    index: "loading.html",
+  });
+});
+
+console.log("Сервер запущен на http://localhost:8000");
+await app.listen({ port: 8000 });
